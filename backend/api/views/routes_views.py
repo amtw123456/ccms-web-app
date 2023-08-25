@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
-from .privatekeys import *
+from .private_keys import *
 
 # API call to get the api endpoints relating to their views
 @api_view(['GET'])
@@ -55,9 +55,12 @@ def getCaseViews(request):
         },
             {
             'Endpoint' : '/get-case-item-order-histogram',
-            'method' : 'GET',
-            'body' : None,
-            'description' : 'Displays a Counter Strike: Global Offensive case order history.'
+            'method' : 'POST',
+            'body' : {
+                "currency": "CURRENCY_SYMBOL(PHP)",
+                "item_nameid": "CASE_NAME(Snakebite Case)",
+            },
+            'description' : 'Displays a Counter Strike: Global Offensive case order history. You can use PHP and Snakebite Case as the request body'
         },    
             {
             'Endpoint' : '/get-case-item-price-history',

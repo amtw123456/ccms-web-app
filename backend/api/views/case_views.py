@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
-from .privatekeys import *
+from .private_keys import *
+from .dictionary_definitions import *
 
 
 @api_view(['GET'])
@@ -16,6 +17,7 @@ def getCsCaseDetails(request):
     csCaseNames = []
     csCasePrices = []
     csCaseImages = []
+    csCaseQuantiy = []
 
     params = {
         'query': 'case',
@@ -41,6 +43,9 @@ def getCsCaseDetails(request):
     formatted_response = json.dumps(parsed_response, indent=2)
     soup = BeautifulSoup(parsed_response["results_html"], 'html.parser')
 
+    for tag in soup.find_all(class_='market_listing_num_listings_qty'):
+        csCaseQuantiy.append(tag.text)
+
     for tag in soup.find_all(class_='sale_price'):
         csCasePrices.append(tag.text)
         # print("----------------------")
@@ -58,6 +63,7 @@ def getCsCaseDetails(request):
         caseDetails = {
             "caseName" : csCaseNames[i],
             "casePrice" : csCasePrices[i],
+            "csCaseQuantiy" : csCaseQuantiy[i],
             "caseUrlLink" : csCaseImages[i],
         }
 
@@ -69,13 +75,22 @@ def getCsCaseDetails(request):
 
 # careful when spamming this api call
 # there is a chance of getting rate limited for an hour so try again after an hour lol
-@api_view(['GET'])
+@api_view(['POST'])
 def getCsCaseOrderHistory(request):
     # URL of the API call
-    url = "https://steamcommunity.com/market/itemordershistogram?country=PH&language=english&currency=12&item_nameid=176288467&two_factor=0"
+    # url = "https://steamcommunity.com/market/itemordershistogram?country=PH&language=english&currency=12&item_nameid=176288467&two_factor=0"
 
-    # Make the HTTP GET request
-    response = requests.get(url)
+    url = "https://steamcommunity.com/market/itemordershistogram"
+
+    params = {
+        "country": "PH",
+        "language": "english",
+        "currency": currencies[request.data['itemCurrency']],
+        "item_nameid": myCaseDictionary[request.data['itemName']],
+        "two_factor": 0
+    }
+
+    response = requests.get(url, params=params)
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
 

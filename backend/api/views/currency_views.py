@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
-from .privatekeys import *
+from .private_keys import *
 
 
 @api_view(['GET'])
