@@ -2,13 +2,13 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from bs4 import BeautifulSoup
+from datetime import datetime, timedelta
 
 import requests
 import json
 
 from .private_keys import *
 from .dictionary_definitions import *
-
 
 @api_view(['GET'])
 def getCsCaseDetails(request):
@@ -98,6 +98,18 @@ def getCsCaseOrderHistory(request):
 
 @api_view(['POST'])
 def getCsCasePriceHistory(request):
+    today = datetime.now()
+    last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+    
+    today_date = today.date()
+    last_month_date = last_month.date()
+
+    # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+    today_formatted = today_date.strftime("%b %d %Y")
+    last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+    print(today_formatted)
+    print(last_month_formatted)
     # URL of the API call
     # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
     # session_cookie = '952d26f2161da77da75e9ea2'
@@ -121,9 +133,14 @@ def getCsCasePriceHistory(request):
     # response = requests.get(url)
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
-    for i in parsed_response['prices'][-500:]:
-        print(i)
-    return Response(parsed_response['prices'])
+    
+    for i in parsed_response['prices'][-750:]:
+        if last_month_formatted in i[0]:
+            print("FOUND!!")
+            break
+        print(i[0])
+        
+    return Response(parsed_response['prices'][-750:])
 
 
     
