@@ -19,6 +19,8 @@ https://steamcommunity.com/market/pricehistory/?appid=730&market_hash_name=Glove
 
 Above are some of the sample API calls we will use for our steam market API website.
 
+Frontend Website Link: https://ccms-web-app-mj9w.vercel.app/
+Backend Website Link: ccms-web-app-api.vercel.app
 
 Now how will I do this? Will I create a database that will contain all data relating the price history of an item?
 
@@ -41,3 +43,11 @@ Things to do
 4. Once we have created our Database we then deploy the database to mongodb atlas 
 5.
 6.
+
+References used when deploying backend server to vercel:
+1. https://www.youtube.com/watch?v=ZjVzHcXCeMU&t=179s
+2. https://www.youtube.com/watch?v=zCUSJkL_CJg
+3. https://devmaesters.com/blog/15
+
+References used for using steam api calls
+1. https://partner.steamgames.com/doc/store/pricing/currencies

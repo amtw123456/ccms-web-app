@@ -1,2 +1,2 @@
-/api/view/private_keys.py
-/api/view/__pycache__
+/api/views/private_keys.py
+/api/views/__pycache__
