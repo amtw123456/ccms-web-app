@@ -96,13 +96,19 @@ def getCsCaseOrderHistory(request):
 
     return Response([parsed_response['buy_order_graph'], parsed_response['sell_order_graph']])
 
-@api_view(['GET'])
+@api_view(['POST'])
 def getCsCasePriceHistory(request):
     # URL of the API call
-    url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Glove%20Case"
-    # url = "https://steamcommunity.com/market/pricehistory/?country=PT&currency=3&appid=730&market_hash_name=Glove%20Case%20Key"
     # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
     # session_cookie = '952d26f2161da77da75e9ea2'
+    url = "https://steamcommunity.com/market/pricehistory/"
+
+    # Define the parameters as a dictionary
+    params = {
+        "currency": currencies[request.data['itemCurrency']],
+        "market_hash_name": request.data['itemName'],
+        "appid": 730,   
+    }
     
     # Set up the request headers with the session cookie
     # we need to use the steamLoginSecure
@@ -110,12 +116,13 @@ def getCsCasePriceHistory(request):
     cookie = {'steamLoginSecure': steamLoginSecure}
 
     # Make the HTTP GET request with the custom headers
-    response = requests.get(url, cookies=cookie)
+    response = requests.get(url, cookies=cookie, params=params)
 
     # response = requests.get(url)
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
-    print(formatted_response)
+    for i in parsed_response['prices'][-500:]:
+        print(i)
     return Response(parsed_response['prices'])
 
 

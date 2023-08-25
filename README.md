@@ -19,47 +19,6 @@ https://steamcommunity.com/market/pricehistory/?appid=730&market_hash_name=Glove
 
 Above are some of the sample API calls we will use for our steam market API website.
 
-    myCaseDictionary = {
-        "Shadow Case" : 67060949,
-        "Glove Case": 175854202,
-        "Dreams & Nightmares Case": 176288467,
-        "Revolver Case" : 84444464,
-        "Horizon Case" : 175999886,
-        "Snakebite Case" : 176240926,
-        "Recoil Case" : 176321160,
-        "Revolution Case" : 176358765,
-        "Falchion Case" : 49359031,
-        "Gamma Case" : 156110183,
-        "Clutch Case" : 175966708,
-        "Operation Riptide Case" : 176264317,
-        "Operation Hydra Case" : 175896275,
-        "Shattered Web Case" : 176096390,
-        "Operation Bravo Case" : 1546282,
-        "Chroma 2 Case" : 40091990,
-        "Spectrum 2 Case" : 175917239,
-        "CS20 Case" : 176091756,
-        "Chroma 3 Case" : 149865785,
-        "Prisma 2 Case" : 176118270,
-        "eSports 2013 Case" : 1269049,
-        "Operation Vanguard Weapon Case" : 23853214,
-        "Winter Offensive Weapon Case" : 3438414,
-        "Operation Broken Fang Case" : 176209154,
-        "Operation Breakout Weapon Case" : 14962905,
-        "Operation Phoenix Weapon Case" : 7177182,
-        "CS:GO Weapon Case 2" : 1913364,
-        "eSports 2014 Summer Case" : 15490346,
-        "eSports 2013 Winter Case" : 15490345,
-        "CS:GO Weapon Case 3" : 6820494,
-        "Prisma Case": 176042493,
-        "Operation Wildfire Case": 139654771,
-        "Danger Zone Case": 176024744,
-        "Chroma Case": 29205213,
-        "Fracture Case": 176185874,
-        "Spectrum Case": 175880240,
-        "Huntsman Weapon Case": 8987853,
-        "Gamma 2 Case" : 165027636
-
-    }
 
 Now how will I do this? Will I create a database that will contain all data relating the price history of an item?
 
