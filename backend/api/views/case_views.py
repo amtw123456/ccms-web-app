@@ -1,33 +1,46 @@
 from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
+from bs4 import BeautifulSoup
 
 import requests
 import json
 
 from .privatekeys import *
-from bs4 import BeautifulSoup
+
 
 @api_view(['GET'])
-def getCsCasePrice(request):
+def getCsCaseDetails(request):
     # URL of the API call
+    csCaseDetailsResponse = []
     csCaseNames = []
     csCasePrices = []
     csCaseImages = []
 
+    params = {
+        'query': 'case',
+        'start': 0,
+        'count': 50,
+        'search_descriptions': 0,
+        'sort_column': 'default',
+        'sort_dir': 'desc',
+        'appid': 730,
+        'category_730_ItemSet[]': 'any',
+        'category_730_ProPlayer[]': 'any',
+        'category_730_StickerCapsule[]': 'any',
+        'category_730_TournamentTeam[]': 'any',
+        'category_730_Weapon[]': 'any',
+        'category_730_Type[]': 'tag_CSGO_Type_WeaponCase'
+    }
 
-    url = "https://steamcommunity.com/market/search/render/?query=case&start=0&count=40&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Type%5B%5D=tag_CSGO_Type_WeaponCase"
+    url = "https://steamcommunity.com/market/search/render/"
 
     # Make the HTTP GET request
-    response = requests.get(url)
+    response = requests.get(url, params=params)
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
-
-
-
-
-
     soup = BeautifulSoup(parsed_response["results_html"], 'html.parser')
+
     for tag in soup.find_all(class_='sale_price'):
         csCasePrices.append(tag.text)
         # print("----------------------")
@@ -40,11 +53,22 @@ def getCsCasePrice(request):
         csCaseImages.append(tag['srcset'].split(' '))
         # print("----------------------")
 
+    
+    for i in range(len(csCaseNames)):
+        caseDetails = {
+            "caseName" : csCaseNames[i],
+            "casePrice" : csCasePrices[i],
+            "caseUrlLink" : csCaseImages[i],
+        }
 
-    return Response([csCaseNames, csCasePrices, csCaseImages])
+        csCaseDetailsResponse.append(caseDetails)
 
+    print(len(csCaseDetailsResponse))
 
-# i'm getting rate limited for an hour so try again after an hour lol
+    return Response(csCaseDetailsResponse)
+
+# careful when spamming this api call
+# there is a chance of getting rate limited for an hour so try again after an hour lol
 @api_view(['GET'])
 def getCsCaseOrderHistory(request):
     # URL of the API call
@@ -78,11 +102,6 @@ def getCsCasePriceHistory(request):
     formatted_response = json.dumps(parsed_response, indent=2)
     print(formatted_response)
     return Response(parsed_response['prices'])
-
-@api_view(['GET'])
-def getcookie(request):  
-    cookie = request.COOKIES['https://steamcommunity.com/']  
-    return Response("steam @: "+  cookie);  
 
 
     

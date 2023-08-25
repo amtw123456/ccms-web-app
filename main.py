@@ -14,11 +14,12 @@ formatted_response = json.dumps(parsed_response, indent=2)
 
 soup = BeautifulSoup(parsed_response["results_html"], 'html.parser')
 
-for tag in soup.find_all(class_='sale_price'):
-    print(tag.text)
-    print("----------------------")
+def fetchCsCasesData():
+    for tag in soup.find_all(class_='sale_price'):
+        print(tag.text)
+        print("----------------------")
 
 
-for tag in soup.find_all(class_='market_listing_item_name'):
-    print(tag.text)
-    print("----------------------")
+    for tag in soup.find_all(class_='market_listing_item_name'):
+        print(tag.text)
+        print("----------------------")
