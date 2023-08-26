@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 
 import requests
 import json
+import os
 
 from .private_keys import *
 from .dictionary_definitions import *
@@ -96,8 +97,11 @@ def getCsCaseOrderHistory(request):
 
     return Response([parsed_response['buy_order_graph'], parsed_response['sell_order_graph']])
 
+# THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
+# DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
 def getCsCasePriceHistory(request):
+
     today = datetime.now()
     last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
     
@@ -133,13 +137,59 @@ def getCsCasePriceHistory(request):
     # response = requests.get(url)
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
+
     
-    for i in parsed_response['prices'][-750:]:
+    # Specify the file path where you want to save the JSON data
+    directory_path = "case_history_price"
+
+    output_file_path = os.path.join(directory_path, request.data['itemName'].lower().replace(" ", "-") + "-price-history.json")
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
+    counter = 0
+    dataPriceHistory = []
+
+    for i in parsed_response['prices']:
+        counter += 1
+        caseDateInformation = {
+            "date" : i[0],
+            "casePrice" : i[1],
+            "numOfCaseSold" : int(i[2]),
+        }
+
+        dataPriceHistory.append(caseDateInformation)
         if last_month_formatted in i[0]:
             print("FOUND!!")
             break
-        print(i[0])
-        
+    
+    currentDate = parsed_response['prices'][counter][0][:11]
+    print("THE CURRENT DATE IS:", currentDate)
+    dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+    ctrDivisor = 1
+    for i in parsed_response['prices'][counter+1:]:
+        if currentDate == i[0][:11]:
+            print(True)
+            dateInformation[1] += i[1]
+            dateInformation[2] += int(i[2])
+            ctrDivisor += 1
+        else:
+            print(False)
+            currentDate = i[0][:11]
+            
+            caseDateInformation = {
+                "date" : dateInformation[0],
+                "casePrice" : round(dateInformation[1] / ctrDivisor, 3),
+                "numOfCaseSold" : dateInformation[2],
+            }
+            dataPriceHistory.append(caseDateInformation)
+            dateInformation = [i[0], i[1], int(i[2])]
+            ctrDivisor = 1
+       
+    with open(output_file_path, "w") as output_file:
+        json.dump({"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory}, output_file, indent=2) 
+    
     return Response(parsed_response['prices'][-750:])
 
 

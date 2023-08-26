@@ -64,9 +64,12 @@ def getCaseViews(request):
         },    
             {
             'Endpoint' : '/get-case-item-price-history',
-            'method' : 'GET',
-            'body' : None,
-            'description' : 'Displays a Counter Strike: Global Offensive case price history.'
+            'method' : 'POST',
+            'body' : {
+                "itemCurrency": "CURRENCY_SYMBOL(PHP)",
+                "itemName": "CASE_NAME(Snakebite Case)",
+            },
+            'description' : 'Displays a Counter Strike: Global Offensive case price history you have to add to your private_keys your steamLoginSecure string.'
         },    
     ]
 
