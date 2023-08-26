@@ -93,7 +93,11 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'djongo',
-        'NAME': os.getenv("DJANGO_DB_URL"),
+        'NAME': os.getenv("DJANGO_DB_NAME"),
+        'CLIENT': {
+            'host': os.getenv("DJANGO_DB_URL"),
+            'port': 27017,  # or the appropriate port number
+        },
     }
 }
 

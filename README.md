@@ -59,7 +59,9 @@ References used for using steam api calls
 References used when working with mongodb
 1. https://stackoverflow.com/questions/57676143/using-multiple-databases-with-django
 2. https://docs.djangoproject.com/en/3.0/topics/db/multi-db/#automatic-database-routing
+3. https://www.youtube.com/watch?v=VQnmcBnguPY
 
-References use for setting up environment variables
+References use for setting up environment variables in vercel
 1. https://www.youtube.com/watch?v=dMOd9sl4ajA
 2. https://kinsta.com/knowledgebase/what-is-an-environment-variable/
+3. https://vercel.com/guides/how-to-add-vercel-environment-variables
