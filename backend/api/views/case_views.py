@@ -3,14 +3,14 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
-
+from dotenv import load_dotenv
 
 import requests
 import time
 import json
 import os
 
-from .private_keys import *
+
 from .dictionary_definitions import *
 
 @api_view(['GET'])
@@ -103,6 +103,9 @@ def getCsCaseOrderHistory(request):
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
 def createAllCsCaseDailyPriceHistoryDaily(request):
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
 
     for caseName in myCaseDictionary:
         print(caseName)
@@ -132,7 +135,7 @@ def createAllCsCaseDailyPriceHistoryDaily(request):
         # Set up the request headers with the session cookie
         # we need to use the steamLoginSecure
         # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
-        cookie = {'steamLoginSecure': steamLoginSecure}
+        cookie = {'steamLoginSecure': steam_login}
 
         # Make the HTTP GET request with the custom headers
         response = requests.get(url, cookies=cookie, params=params)
@@ -196,6 +199,9 @@ def createAllCsCaseDailyPriceHistoryDaily(request):
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
 def createSpecificCsCasePriceHistoryDaily(request):
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
 
     today = datetime.now()
     last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
@@ -222,7 +228,7 @@ def createSpecificCsCasePriceHistoryDaily(request):
     # Set up the request headers with the session cookie
     # we need to use the steamLoginSecure
     # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
-    cookie = {'steamLoginSecure': steamLoginSecure}
+    cookie = {'steamLoginSecure': steam_login}
 
     # Make the HTTP GET request with the custom headers
     response = requests.get(url, cookies=cookie, params=params)
@@ -284,6 +290,9 @@ def createSpecificCsCasePriceHistoryDaily(request):
 
 @api_view(['POST'])
 def getCsCasePriceHistoryDaily(request):
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
 
     today = datetime.now()
     last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
@@ -312,7 +321,7 @@ def getCsCasePriceHistoryDaily(request):
     # Set up the request headers with the session cookie
     # we need to use the steamLoginSecure
     # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
-    cookie = {'steamLoginSecure': steamLoginSecure}
+    cookie = {'steamLoginSecure': steam_login}
 
     # Make the HTTP GET request with the custom headers
     response = requests.get(url, cookies=cookie, params=params)

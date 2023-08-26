@@ -6,8 +6,6 @@ from bs4 import BeautifulSoup
 import requests
 import json
 
-from .private_keys import *
-
 # API call to get the api endpoints relating to their views
 @api_view(['GET'])
 def getViewRoutes(request):

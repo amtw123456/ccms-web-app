@@ -1,3 +1,4 @@
 /api/views/private_keys.py
 /api/views/__pycache__
 /case_history_price
+/.env
