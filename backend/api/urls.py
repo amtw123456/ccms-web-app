@@ -10,7 +10,10 @@ urlpatterns = [
 
     path('get-all-case-details', getCsCaseDetails),
     path('get-case-item-order-histogram', getCsCaseOrderHistory),
-    path('get-case-item-price-history', getCsCasePriceHistory),
+    path('get-case-item-price-history-daily', getCsCasePriceHistoryDaily),
+
+    path('create-all-case-item-price-history-daily', createAllCsCaseDailyPriceHistory),
+    path('create-specific-case-item-price-history-daily', createSpecificCsCasePriceHistory),
 
     path("get-all-currency-exchange-rate", getCurrencyExchangeRates),
 

@@ -1,25 +1,14 @@
 import requests
-import json
-from bs4 import BeautifulSoup
 
-# URL of the API call
-url = "https://steamcommunity.com/market/search/render/?query=case&start=0&count=3&search_descriptions=0&sort_column=default&sort_dir=desc&appid=730&category_730_ItemSet%5B%5D=any&category_730_ProPlayer%5B%5D=any&category_730_StickerCapsule%5B%5D=any&category_730_TournamentTeam%5B%5D=any&category_730_Weapon%5B%5D=any&category_730_Type%5B%5D=tag_CSGO_Type_WeaponCase"
+url = 'https://store.steampowered.com/login/?redir=&redir_ssl=1&snr=1_4_4__global-header'  # Replace with the URL of the website you want to get cookies from
 
-# Make the HTTP GET request
 response = requests.get(url)
-parsed_response = json.loads(response.content)
-formatted_response = json.dumps(parsed_response, indent=2)
+cookies = response.cookies
 
-# print(parsed_response)
-
-soup = BeautifulSoup(parsed_response["results_html"], 'html.parser')
-
-def fetchCsCasesData():
-    for tag in soup.find_all(class_='sale_price'):
-        print(tag.text)
-        print("----------------------")
-
-
-    for tag in soup.find_all(class_='market_listing_item_name'):
-        print(tag.text)
-        print("----------------------")
+for cookie in cookies:
+    print(f"Name: {cookie.name}")
+    print(f"Value: {cookie.value}")
+    print(f"Domain: {cookie.domain}")
+    print(f"Path: {cookie.path}")
+    print(f"Expires: {cookie.expires}")
+    print("----")

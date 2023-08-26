@@ -2,9 +2,11 @@ from django.shortcuts import render
 from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from bs4 import BeautifulSoup
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+
 
 import requests
+import time
 import json
 import os
 
@@ -100,7 +102,188 @@ def getCsCaseOrderHistory(request):
 # THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
-def getCsCasePriceHistory(request):
+def createAllCsCaseDailyPriceHistory(request):
+
+    for caseName in myCaseDictionary:
+        print(caseName)
+        time.sleep(6)
+        today = datetime.now()
+        last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+        
+        today_date = today.date()
+        last_month_date = last_month.date()
+
+        # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+        today_formatted = today_date.strftime("%b %d %Y")
+        last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+        # URL of the API call
+        # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
+        # session_cookie = '952d26f2161da77da75e9ea2'
+        url = "https://steamcommunity.com/market/pricehistory/"
+
+        # Define the parameters as a dictionary
+        params = {
+            "currency": currencies[request.data['itemCurrency']],
+            "market_hash_name": caseName,
+            "appid": 730,   
+        }
+        
+        # Set up the request headers with the session cookie
+        # we need to use the steamLoginSecure
+        # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
+        cookie = {'steamLoginSecure': steamLoginSecure}
+
+        # Make the HTTP GET request with the custom headers
+        response = requests.get(url, cookies=cookie, params=params)
+
+        # response = requests.get(url)
+        parsed_response = json.loads(response.content)
+        formatted_response = json.dumps(parsed_response, indent=2)
+
+        # Specify the file path where you want to save the JSON data
+        directory_path = "case_history_price"
+
+        output_file_path = os.path.join(directory_path, caseName.lower().replace(" ", "-").replace(":", "") + "-price-history-in-" + request.data['itemCurrency'] + ".json")
+
+        # Create the directory if it doesn't exist
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+
+        counter = 0
+        dataPriceHistory = []
+
+        for i in parsed_response['prices']:
+            counter += 1
+            caseDateInformation = {
+                "date" : i[0],
+                "casePrice" : i[1],
+                "numOfCaseSold" : int(i[2]),
+            }
+
+            dataPriceHistory.append(caseDateInformation)
+            if last_month_formatted in i[0]:
+                # print("FOUND!!")
+                break
+        
+        currentDate = parsed_response['prices'][counter][0][:11]
+        dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+        ctrDivisor = 1
+        for i in parsed_response['prices'][counter+1:]:
+            if currentDate == i[0][:11]:
+                dateInformation[1] += i[1]
+                dateInformation[2] += int(i[2])
+                ctrDivisor += 1
+            else:
+                currentDate = i[0][:11]
+                
+                caseDateInformation = {
+                    "date" : dateInformation[0],
+                    "casePrice" : round(dateInformation[1] / ctrDivisor, 3),
+                    "numOfCaseSold" : dateInformation[2],
+                }
+                dataPriceHistory.append(caseDateInformation)
+                dateInformation = [i[0], i[1], int(i[2])]
+                ctrDivisor = 1
+        
+        with open(output_file_path, "w") as output_file:
+            json.dump({"currentTimeInUtc": datetime.now(timezone.utc),"caseName": caseName, "casePriceHistory": dataPriceHistory}, output_file, indent=2, default=str) 
+    
+    return Response("Created json files")
+
+
+# THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
+# DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
+@api_view(['POST'])
+def createSpecificCsCasePriceHistory(request):
+
+    today = datetime.now()
+    last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+    
+    today_date = today.date()
+    last_month_date = last_month.date()
+
+    # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+    today_formatted = today_date.strftime("%b %d %Y")
+    last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+    # URL of the API call
+    # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
+    # session_cookie = '952d26f2161da77da75e9ea2'
+    url = "https://steamcommunity.com/market/pricehistory/"
+
+    # Define the parameters as a dictionary
+    params = {
+        "currency": currencies[request.data['itemCurrency']],
+        "market_hash_name": request.data['itemName'],
+        "appid": 730,   
+    }
+    
+    # Set up the request headers with the session cookie
+    # we need to use the steamLoginSecure
+    # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
+    cookie = {'steamLoginSecure': steamLoginSecure}
+
+    # Make the HTTP GET request with the custom headers
+    response = requests.get(url, cookies=cookie, params=params)
+
+    # response = requests.get(url)
+    parsed_response = json.loads(response.content)
+    formatted_response = json.dumps(parsed_response, indent=2)
+
+    # Specify the file path where you want to save the JSON data
+    directory_path = "case_history_price"
+
+    output_file_path = os.path.join(directory_path, request.data['itemName'].lower().replace(" ", "-").replace(":", "") + "-price-history-in-" + request.data['itemCurrency'] + ".json")
+
+    # Create the directory if it doesn't exist
+    if not os.path.exists(directory_path):
+        os.makedirs(directory_path)
+
+    counter = 0
+    dataPriceHistory = []
+
+    for i in parsed_response['prices']:
+        counter += 1
+        caseDateInformation = {
+            "date" : i[0],
+            "casePrice" : i[1],
+            "numOfCaseSold" : int(i[2]),
+        }
+
+        dataPriceHistory.append(caseDateInformation)
+        if last_month_formatted in i[0]:
+            print("FOUND!!")
+            break
+    
+    currentDate = parsed_response['prices'][counter][0][:11]
+    print("THE CURRENT DATE IS:", currentDate)
+    dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+    ctrDivisor = 1
+    for i in parsed_response['prices'][counter+1:]:
+        if currentDate == i[0][:11]:
+            dateInformation[1] += i[1]
+            dateInformation[2] += int(i[2])
+            ctrDivisor += 1
+        else:
+            currentDate = i[0][:11]
+            
+            caseDateInformation = {
+                "date" : dateInformation[0],
+                "casePrice" : round(dateInformation[1] / ctrDivisor, 3),
+                "numOfCaseSold" : dateInformation[2],
+            }
+            dataPriceHistory.append(caseDateInformation)
+            dateInformation = [i[0], i[1], int(i[2])]
+            ctrDivisor = 1
+       
+    with open(output_file_path, "w") as output_file:
+        json.dump({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory}, output_file, indent=2, default=str) 
+    
+    return Response({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory})
+
+@api_view(['POST'])
+def getCsCasePriceHistoryDaily(request):
 
     today = datetime.now()
     last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
@@ -138,15 +321,7 @@ def getCsCasePriceHistory(request):
     parsed_response = json.loads(response.content)
     formatted_response = json.dumps(parsed_response, indent=2)
 
-    
-    # Specify the file path where you want to save the JSON data
-    directory_path = "case_history_price"
-
-    output_file_path = os.path.join(directory_path, request.data['itemName'].lower().replace(" ", "-") + "-price-history.json")
-
     # Create the directory if it doesn't exist
-    if not os.path.exists(directory_path):
-        os.makedirs(directory_path)
 
     counter = 0
     dataPriceHistory = []
@@ -165,9 +340,9 @@ def getCsCasePriceHistory(request):
             break
     
     currentDate = parsed_response['prices'][counter][0][:11]
-    print("THE CURRENT DATE IS:", currentDate)
     dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
     ctrDivisor = 1
+
     for i in parsed_response['prices'][counter+1:]:
         if currentDate == i[0][:11]:
             print(True)
@@ -186,11 +361,9 @@ def getCsCasePriceHistory(request):
             dataPriceHistory.append(caseDateInformation)
             dateInformation = [i[0], i[1], int(i[2])]
             ctrDivisor = 1
-       
-    with open(output_file_path, "w") as output_file:
-        json.dump({"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory}, output_file, indent=2) 
-    
-    return Response(parsed_response['prices'][-750:])
+   
+    return Response({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory})
+
 
 
     

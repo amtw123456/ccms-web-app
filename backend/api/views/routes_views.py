@@ -61,16 +61,34 @@ def getCaseViews(request):
                 "item_nameid": "CASE_NAME(Snakebite Case)",
             },
             'description' : 'Displays a Counter Strike: Global Offensive case order history. You can use PHP and Snakebite Case as the request body'
-        },    
+        }, 
             {
-            'Endpoint' : '/get-case-item-price-history',
+            'Endpoint' : '/get-case-item-price-history-daily',
             'method' : 'POST',
             'body' : {
                 "itemCurrency": "CURRENCY_SYMBOL(PHP)",
                 "itemName": "CASE_NAME(Snakebite Case)",
             },
-            'description' : 'Displays a Counter Strike: Global Offensive case price history you have to add to your private_keys your steamLoginSecure string.'
-        },    
+            'description' : 'Displays a Counter Strike: Global Offensive case daily price history you have to add to your private_keys your steamLoginSecure string.'
+        }, 
+            {
+            'Endpoint' : '/create-all-case-item-price-history',
+            'method' : 'POST',
+            'body' : {
+                "itemCurrency": "CURRENCY_SYMBOL(PHP)",
+                "itemName": "CASE_NAME(Snakebite Case)",
+            },
+            'description' : 'We should only use this in our backend locally this creates a json file for a specific case in the game Counter Strike: Global Offensive the data information will be the daily price history you have to add to your private_keys your steamLoginSecure string.'
+        },     
+            {
+            'Endpoint' : '/create-specific-case-item-price-history',
+            'method' : 'POST',
+            'body' : {
+                "itemCurrency": "CURRENCY_SYMBOL(PHP)",
+                "itemName": "CASE_NAME(Snakebite Case)",
+            },
+            'description' : 'We should only use this in our backend locally this creates a json file for a specific case in the game Counter Strike: Global Offensive the data information will be the daily price history you have to add to your private_keys your steamLoginSecure string.'
+        },   
     ]
 
 
