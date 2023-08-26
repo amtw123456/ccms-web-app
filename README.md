@@ -1,3 +1,7 @@
+Frontend Website Link: https://ccms-web-app-api-amtw123456.vercel.app/
+Backend Website Link: https://ccms-web-app-mj9w.vercel.app/
+
+
 Note you have to be logged into steam for some queries to work
 
 https://steamcommunity.com/market/search/render/?query=&start=1490&count=10&search_descriptions=0&sort_column=price&sort_dir=desc&appid=730&norender=1&market_hash_name=Operation%20Vanguard%20Weapon%20Case
@@ -51,3 +55,7 @@ References used when deploying backend server to vercel:
 
 References used for using steam api calls
 1. https://partner.steamgames.com/doc/store/pricing/currencies
+
+References used when working with mongodb
+1. https://stackoverflow.com/questions/57676143/using-multiple-databases-with-django
+2. https://docs.djangoproject.com/en/3.0/topics/db/multi-db/#automatic-database-routing

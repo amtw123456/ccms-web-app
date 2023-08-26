@@ -87,6 +87,12 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 #     }
 # }
 
+DATABASES = {
+    'default': {
+        'ENGINE': 'djongo',
+        'NAME': 'csgo-case-database',
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators

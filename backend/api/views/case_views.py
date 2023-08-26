@@ -102,11 +102,11 @@ def getCsCaseOrderHistory(request):
 # THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
-def createAllCsCaseDailyPriceHistory(request):
+def createAllCsCaseDailyPriceHistoryDaily(request):
 
     for caseName in myCaseDictionary:
         print(caseName)
-        time.sleep(6)
+        time.sleep(3)
         today = datetime.now()
         last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
         
@@ -187,7 +187,7 @@ def createAllCsCaseDailyPriceHistory(request):
                 ctrDivisor = 1
         
         with open(output_file_path, "w") as output_file:
-            json.dump({"currentTimeInUtc": datetime.now(timezone.utc),"caseName": caseName, "casePriceHistory": dataPriceHistory}, output_file, indent=2, default=str) 
+            json.dump({"currentTimeCreatedInUtc": datetime.now(timezone.utc),"caseName": caseName, "casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
     
     return Response("Created json files")
 
@@ -195,7 +195,7 @@ def createAllCsCaseDailyPriceHistory(request):
 # THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
 @api_view(['POST'])
-def createSpecificCsCasePriceHistory(request):
+def createSpecificCsCasePriceHistoryDaily(request):
 
     today = datetime.now()
     last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
@@ -278,9 +278,9 @@ def createSpecificCsCasePriceHistory(request):
             ctrDivisor = 1
        
     with open(output_file_path, "w") as output_file:
-        json.dump({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory}, output_file, indent=2, default=str) 
+        json.dump({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
     
-    return Response({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory})
+    return Response({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory})
 
 @api_view(['POST'])
 def getCsCasePriceHistoryDaily(request):
@@ -362,7 +362,7 @@ def getCsCasePriceHistoryDaily(request):
             dateInformation = [i[0], i[1], int(i[2])]
             ctrDivisor = 1
    
-    return Response({"currentTimeInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistory": dataPriceHistory})
+    return Response({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory})
 
 
 
