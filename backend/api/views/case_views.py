@@ -3,11 +3,13 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from bs4 import BeautifulSoup
 from datetime import datetime, timedelta, timezone
+from collections import OrderedDict
 from dotenv import load_dotenv
 
 import requests
 import time
 import json
+import ast
 import os
 
 from .dictionary_definitions import *
@@ -549,5 +551,26 @@ def putAllCaseDailyPriceHistoryToDatabase(request):
                 return Response(data={"message": "Error saving to database"})
     
     return Response(data={"message": "All case information successfully saved to database"})
+
+@api_view(['POST'])
+def retreiveSpecificCaseDailyPriceHistoryFromDatabase(request):
+    user = DailyCasePriceHistoryInformation.objects.filter(caseName=request.data['caseName'])
+    serializer = DailyCasePriceHistoryInformationSerializer(user, many=True)
+
+    # initially our serializer.data[0]["casePriceHistoryDaily"] contains a string that was once a list of dictionary objects
+    serialized_data = serializer.data[0]["casePriceHistoryDaily"]
+
+    # this turns the value of serializer.data[0]["casePriceHistoryDaily"] into a list which we will iterate over
+    list_form = eval(serialized_data)
+
+    for i in range(len(list(list_form))):
+        # converts the current list_form[index] value into a dictionary initially it was OrderedDict([('date', 'Jul 01 2022 01: +0'), ('casePrice', 1061.734), ('numOfCaseSold', 6647)])
+        # after applying the dict on the current list_form index it will now be like this a proper dictionary { "date": "Jul 01 2022 01: +0", "casePrice": 1061.734, "numOfCaseSold": 6647 },
+        list_form[i] = dict(list_form[i])
+
+    serializer.data[0]["casePriceHistoryDaily"] = list_form
+
+    return Response(serializer.data)
+    
 
 

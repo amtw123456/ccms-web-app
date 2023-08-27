@@ -1,5 +1,6 @@
 /api/views/__pycache__
 /backend/__pycache__
+/api/migrations
 /case_history_price
 /api/__pycache__
 /.env

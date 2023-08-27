@@ -12,6 +12,8 @@ urlpatterns = [
     path('get-case-item-order-histogram', getCsCaseOrderHistory),
     path('get-case-item-price-history-daily', getCsCasePriceHistoryDaily),
 
+    path('retreive-specific-case-item-price-history-daily',retreiveSpecificCaseDailyPriceHistoryFromDatabase),
+
     path('put-specific-case-item-price-history-daily', putSpecficCaseDailyPriceHistoryToDatabase),
     path('put-all-case-item-price-history-daily', putAllCaseDailyPriceHistoryToDatabase),
 
