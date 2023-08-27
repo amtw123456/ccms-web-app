@@ -101,6 +101,7 @@ def getCsCaseOrderHistory(request):
 
 # THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
+# IF WE USE THIS API CALL ON OUR VERCEL DEPLOYMENT WE WILL GET AN ERROR Exception Value: [Errno 30] Read-only file system
 @api_view(['POST'])
 def createAllCsCaseDailyPriceHistoryDaily(request):
     load_dotenv()
@@ -197,6 +198,7 @@ def createAllCsCaseDailyPriceHistoryDaily(request):
 
 # THIS API CALL GETS ALL THE DAILY PRICE OF A CASE AND NUMBER OF CASES SOLD IN THAT SPECIFIC DAY
 # DONT USE THIS API CALL SINCE IT WILL CREATE A JSON FILE EVERYTIME WE CALL IT
+# IF WE USE THIS API CALL ON OUR VERCEL DEPLOYMENT WE WILL GET AN ERROR Exception Value: [Errno 30] Read-only file system
 @api_view(['POST'])
 def createSpecificCsCasePriceHistoryDaily(request):
     load_dotenv()
@@ -259,11 +261,9 @@ def createSpecificCsCasePriceHistoryDaily(request):
 
         dataPriceHistory.append(caseDateInformation)
         if last_month_formatted in i[0]:
-            print("FOUND!!")
             break
     
     currentDate = parsed_response['prices'][counter][0][:11]
-    print("THE CURRENT DATE IS:", currentDate)
     dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
     ctrDivisor = 1
     for i in parsed_response['prices'][counter+1:]:
@@ -304,8 +304,6 @@ def getCsCasePriceHistoryDaily(request):
     today_formatted = today_date.strftime("%b %d %Y")
     last_month_formatted = last_month_date.strftime("%b %d %Y")
 
-    print(today_formatted)
-    print(last_month_formatted)
     # URL of the API call
     # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
     # session_cookie = '952d26f2161da77da75e9ea2'
@@ -345,7 +343,6 @@ def getCsCasePriceHistoryDaily(request):
 
         dataPriceHistory.append(caseDateInformation)
         if last_month_formatted in i[0]:
-            print("FOUND!!")
             break
     
     currentDate = parsed_response['prices'][counter][0][:11]
@@ -354,12 +351,10 @@ def getCsCasePriceHistoryDaily(request):
 
     for i in parsed_response['prices'][counter+1:]:
         if currentDate == i[0][:11]:
-            print(True)
             dateInformation[1] += i[1]
             dateInformation[2] += int(i[2])
             ctrDivisor += 1
         else:
-            print(False)
             currentDate = i[0][:11]
             
             caseDateInformation = {
@@ -372,6 +367,7 @@ def getCsCasePriceHistoryDaily(request):
             ctrDivisor = 1
    
     return Response({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory})
+
 
 
 

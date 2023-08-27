@@ -1,5 +1,6 @@
-Frontend Website Link: https://ccms-web-app-api-amtw123456.vercel.app/
-Backend Website Link: https://ccms-web-app-mj9w.vercel.app/
+Frontend Website Link: https://ccms-web-app-mj9w.vercel.app/ 
+Backend Website Link: https://ccms-web-app-api-amtw123456.vercel.app/
+
 
 
 Note you have to be logged into steam for some queries to work
