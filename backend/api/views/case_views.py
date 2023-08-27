@@ -10,8 +10,9 @@ import time
 import json
 import os
 
-
 from .dictionary_definitions import *
+from ..serializers import *
+from ..models import *
 
 @api_view(['GET'])
 def getCsCaseDetails(request):
@@ -191,7 +192,7 @@ def createAllCsCaseDailyPriceHistoryDaily(request):
                 ctrDivisor = 1
         
         with open(output_file_path, "w") as output_file:
-            json.dump({"currentTimeCreatedInUtc": datetime.now(timezone.utc),"caseName": caseName, "casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
+            json.dump({"caseName": caseName, "currentTimeCreatedInUtc": datetime.now(timezone.utc), "casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
     
     return Response("Created json files")
 
@@ -284,9 +285,9 @@ def createSpecificCsCasePriceHistoryDaily(request):
             ctrDivisor = 1
        
     with open(output_file_path, "w") as output_file:
-        json.dump({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
+        json.dump({"caseName": request.data['itemName'], "currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"casePriceHistoryDaily": dataPriceHistory}, output_file, indent=2, default=str) 
     
-    return Response({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory})
+    return Response({"caseName": request.data['itemName'], "currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"casePriceHistoryDaily": dataPriceHistory})
 
 @api_view(['POST'])
 def getCsCasePriceHistoryDaily(request):
@@ -365,13 +366,188 @@ def getCsCasePriceHistoryDaily(request):
             dataPriceHistory.append(caseDateInformation)
             dateInformation = [i[0], i[1], int(i[2])]
             ctrDivisor = 1
-   
-    return Response({"currentTimeCreatedInUtc": datetime.now(timezone.utc) ,"caseName": request.data['itemName'], "casePriceHistoryDaily": dataPriceHistory})
+
+    return Response({"caseName": request.data['itemName'], "currentTimeCreatedInUtc": datetime.now(timezone.utc) , "casePriceHistoryDaily": dataPriceHistory})
 
 
 
+@api_view(['POST'])
+def putSpecficCaseDailyPriceHistoryToDatabase(request):
 
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
+
+    today = datetime.now()
+    last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+    
+    today_date = today.date()
+    last_month_date = last_month.date()
+
+    # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+    today_formatted = today_date.strftime("%b %d %Y")
+    last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+    # URL of the API call
+    # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
+    # session_cookie = '952d26f2161da77da75e9ea2'
+    url = "https://steamcommunity.com/market/pricehistory/"
+
+    # Define the parameters as a dictionary
+    params = {
+        "currency": currencies[request.data['itemCurrency']],
+        "market_hash_name": request.data['itemName'],
+        "appid": 730,   
+    }
+    
+    # Set up the request headers with the session cookie
+    # we need to use the steamLoginSecure
+    # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
+    cookie = {'steamLoginSecure': steam_login}
+
+    # Make the HTTP GET request with the custom headers
+    response = requests.get(url, cookies=cookie, params=params)
+
+    # response = requests.get(url)
+    parsed_response = json.loads(response.content)
+    formatted_response = json.dumps(parsed_response, indent=2)
+
+    # Create the directory if it doesn't exist
+
+    counter = 0
+    dataPriceHistory = []
+
+    for i in parsed_response['prices']:
+        counter += 1
+        caseDateInformation = {
+            "date" : i[0],
+            "casePrice" : i[1],
+            "numOfCaseSold" : int(i[2]),
+        }
+
+        dataPriceHistory.append(caseDateInformation)
+        if last_month_formatted in i[0]:
+            break
+    
+    currentDate = parsed_response['prices'][counter][0][:11]
+    dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+    ctrDivisor = 1
+
+    for i in parsed_response['prices'][counter+1:]:
+        if currentDate == i[0][:11]:
+            dateInformation[1] += i[1]
+            dateInformation[2] += int(i[2])
+            ctrDivisor += 1
+        else:
+            currentDate = i[0][:11]
+            
+            caseDateInformation = {
+                "date" : dateInformation[0],
+                "casePrice" : round(dateInformation[1] / ctrDivisor, 3),
+                "numOfCaseSold" : dateInformation[2],
+            }
+            dataPriceHistory.append(caseDateInformation)
+            dateInformation = [i[0], i[1], int(i[2])]
+            ctrDivisor = 1
+
+    serializer = DailyCasePriceHistoryInformationSerializer(data={"caseName": request.data['itemName'], "currentTimeCreatedInUtc": datetime.now(timezone.utc) , "casePriceHistoryDaily": dataPriceHistory})
+    
+    if serializer.is_valid():
+        try:
+            serializer.save()
+        except Exception as e:
+            return Response(data={"message": "Error saving to database"})
+        
+    return Response(data={"message": "Case information successfully saved to database"})
     
 
+@api_view(['POST'])
+def putAllCaseDailyPriceHistoryToDatabase(request):
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
+
+    for caseName in myCaseDictionary:
+        print(caseName)
+        time.sleep(4)
+        today = datetime.now()
+        last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+        
+        today_date = today.date()
+        last_month_date = last_month.date()
+
+        # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+        today_formatted = today_date.strftime("%b %d %Y")
+        last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+        # URL of the API call
+        # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
+        # session_cookie = '952d26f2161da77da75e9ea2'
+        url = "https://steamcommunity.com/market/pricehistory/"
+
+        # Define the parameters as a dictionary
+        params = {
+            "currency": currencies[request.data['itemCurrency']],
+            "market_hash_name": caseName,
+            "appid": 730,   
+        }
+        
+        # Set up the request headers with the session cookie
+        # we need to use the steamLoginSecure
+        # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
+        cookie = {'steamLoginSecure': steam_login}
+
+        # Make the HTTP GET request with the custom headers
+        response = requests.get(url, cookies=cookie, params=params)
+
+        # response = requests.get(url)
+        parsed_response = json.loads(response.content)
+        formatted_response = json.dumps(parsed_response, indent=2)
+
+        counter = 0
+        dataPriceHistory = []
+
+        for i in parsed_response['prices']:
+            counter += 1
+            caseDateInformation = {
+                "date" : i[0],
+                "casePrice" : i[1],
+                "numOfCaseSold" : int(i[2]),
+            }
+
+            dataPriceHistory.append(caseDateInformation)
+            if last_month_formatted in i[0]:
+                # print("FOUND!!")
+                break
+        
+        currentDate = parsed_response['prices'][counter][0][:11]
+        dateInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+        ctrDivisor = 1
+        for i in parsed_response['prices'][counter+1:]:
+            if currentDate == i[0][:11]:
+                dateInformation[1] += i[1]
+                dateInformation[2] += int(i[2])
+                ctrDivisor += 1
+            else:
+                currentDate = i[0][:11]
+                
+                caseDateInformation = {
+                    "date" : dateInformation[0],
+                    "casePrice" : round(dateInformation[1] / ctrDivisor, 3),
+                    "numOfCaseSold" : dateInformation[2],
+                }
+                dataPriceHistory.append(caseDateInformation)
+                dateInformation = [i[0], i[1], int(i[2])]
+                ctrDivisor = 1
+
+        serializer = DailyCasePriceHistoryInformationSerializer(data={"caseName": caseName, "currentTimeCreatedInUtc": datetime.now(timezone.utc) , "casePriceHistoryDaily": dataPriceHistory})
+    
+        if serializer.is_valid():
+            try:
+                serializer.save()
+            except Exception as e:
+                return Response(data={"message": "Error saving to database"})
+    
+    return Response(data={"message": "All case information successfully saved to database"})
 
 

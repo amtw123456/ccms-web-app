@@ -12,9 +12,11 @@ urlpatterns = [
     path('get-case-item-order-histogram', getCsCaseOrderHistory),
     path('get-case-item-price-history-daily', getCsCasePriceHistoryDaily),
 
+    path('put-specific-case-item-price-history-daily', putSpecficCaseDailyPriceHistoryToDatabase),
+    path('put-all-case-item-price-history-daily', putAllCaseDailyPriceHistoryToDatabase),
+
     path('create-all-case-item-price-history-daily', createAllCsCaseDailyPriceHistoryDaily),
     path('create-specific-case-item-price-history-daily', createSpecificCsCasePriceHistoryDaily),
 
     path("get-all-currency-exchange-rate", getCurrencyExchangeRates),
-
 ]
