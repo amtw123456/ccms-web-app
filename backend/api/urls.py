@@ -17,6 +17,8 @@ urlpatterns = [
     path('put-specific-case-item-price-history-daily', putSpecficCaseDailyPriceHistoryToDatabase),
     path('put-all-case-item-price-history-daily', putAllCaseDailyPriceHistoryToDatabase),
 
+    path('update-specific-case-item-price-history-daily', updateSpecificCaseDailyPriceHistoryFromDatabase),
+
     path('create-all-case-item-price-history-daily', createAllCsCaseDailyPriceHistoryDaily),
     path('create-specific-case-item-price-history-daily', createSpecificCsCasePriceHistoryDaily),
 

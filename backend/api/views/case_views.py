@@ -470,8 +470,7 @@ def putAllCaseDailyPriceHistoryToDatabase(request):
     steam_login = os.getenv("STEAM_LOGIN_SECURE")
 
     for caseName in myCaseDictionary:
-        print(caseName)
-        time.sleep(4)
+        time.sleep(6)
         today = datetime.now()
         last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
         
@@ -554,8 +553,8 @@ def putAllCaseDailyPriceHistoryToDatabase(request):
 
 @api_view(['POST'])
 def retreiveSpecificCaseDailyPriceHistoryFromDatabase(request):
-    user = DailyCasePriceHistoryInformation.objects.filter(caseName=request.data['caseName'])
-    serializer = DailyCasePriceHistoryInformationSerializer(user, many=True)
+    caseInformation = DailyCasePriceHistoryInformation.objects.filter(caseName=request.data['caseName'])
+    serializer = DailyCasePriceHistoryInformationSerializer(caseInformation, many=True)
 
     # initially our serializer.data[0]["casePriceHistoryDaily"] contains a string that was once a list of dictionary objects
     serialized_data = serializer.data[0]["casePriceHistoryDaily"]
@@ -571,6 +570,94 @@ def retreiveSpecificCaseDailyPriceHistoryFromDatabase(request):
     serializer.data[0]["casePriceHistoryDaily"] = list_form
 
     return Response(serializer.data)
+
+
+@api_view(['PUT'])
+def updateSpecificCaseDailyPriceHistoryFromDatabase(request):
+
+    # initially our serializer.data[0]["casePriceHistoryDaily"] contains a string that was once a list of dictionary objects
+
+    load_dotenv()
+
+    steam_login = os.getenv("STEAM_LOGIN_SECURE")
+
+    today = datetime.now()
+    last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
+    
+    today_date = today.date()
+    last_month_date = last_month.date()
+
+    # Format the dates as "Month Day Year" (e.g., "May 30 2023")
+    today_formatted = today_date.strftime("%b %d %Y")
+    last_month_formatted = last_month_date.strftime("%b %d %Y")
+
+    # URL of the API call
+    # url = "https://steamcommunity.com/market/pricehistory/?currency=12&appid=730&market_hash_name=Revolution%20Case"
+    # session_cookie = '952d26f2161da77da75e9ea2'
+    url = "https://steamcommunity.com/market/pricehistory/"
+
+    # Define the parameters as a dictionary
+    params = {
+        "currency": currencies["PHP"],
+        "market_hash_name": request.data['caseName'],
+        "appid": 730,   
+    }
+    
+    # Set up the request headers with the session cookie
+    # we need to use the steamLoginSecure
+    # https://stackoverflow.com/questions/31961868/how-to-retrieve-steam-market-price-history
+    cookie = {'steamLoginSecure': steam_login}
+
+    # Make the HTTP GET request with the custom headers
+    response = requests.get(url, cookies=cookie, params=params)
+
+    # response = requests.get(url)
+    parsed_response = json.loads(response.content)
+    formatted_response = json.dumps(parsed_response, indent=2)
+
+    # Create the directory if it doesn't exist
+
+    counter = 0
+    dataPriceHistory = []
+
+    for i in parsed_response['prices']:
+        counter += 1
+        caseDataInformation = {
+            "date" : i[0],
+            "casePrice" : i[1],
+            "numOfCaseSold" : int(i[2]),
+        }
+
+        dataPriceHistory.append(caseDataInformation)
+        if last_month_formatted in i[0]:
+            break
+    
+    currentDate = parsed_response['prices'][counter][0][:11]
+    dataInformation = [parsed_response['prices'][counter][0], parsed_response['prices'][counter][1], int(parsed_response['prices'][counter][2])]
+    ctrDivisor = 1
+
+    for i in parsed_response['prices'][counter+1:]:
+        if currentDate == i[0][:11]:
+            dataInformation[1] += i[1]
+            dataInformation[2] += int(i[2])
+            ctrDivisor += 1
+        else:
+            currentDate = i[0][:11]
+            
+            caseDataInformation = {
+                "date" : dataInformation[0],
+                "casePrice" : round(dataInformation[1] / ctrDivisor, 3),
+                "numOfCaseSold" : dataInformation[2],
+            }
+            dataPriceHistory.append(caseDataInformation)
+            dataInformation = [i[0], i[1], int(i[2])]
+            ctrDivisor = 1
+
+    # caseInformation.save()
+
+    DailyCasePriceHistoryInformation.objects.filter(caseName=request.data['caseName']).update(currentTimeCreatedInUtc=datetime.now(timezone.utc), casePriceHistoryDaily=dataPriceHistory)
+
+    return Response(data={"message": "Successfully edited case information"})
     
 
 
