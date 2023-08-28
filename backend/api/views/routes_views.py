@@ -68,6 +68,15 @@ def getCaseViews(request):
                 "itemName": "CASE_NAME(Snakebite Case)",
             },
             'description' : 'Displays a Counter Strike: Global Offensive case daily price history you have to add to your private_keys your steamLoginSecure string.'
+        },
+             {
+            'Endpoint' : '/retreive-specific-case-item-price-history-daily',
+            'method' : 'POST',
+            'body' : {
+                "itemCurrency": "CURRENCY_SYMBOL(PHP)",
+                "itemName": "CASE_NAME(Snakebite Case)",
+            },
+            'description' : 'Gets a specific case daily price information in the database of our website'
         }, 
             {
             'Endpoint' : '/put-specific-case-item-price-history-daily',
@@ -76,7 +85,7 @@ def getCaseViews(request):
                 "itemCurrency": "CURRENCY_SYMBOL(PHP)",
                 "itemName": "CASE_NAME(Snakebite Case)",
             },
-            'description' : 'We should only use this in our backend locally this creates a json file for all cases in the game Counter Strike: Global Offensive the data information will be the daily price history you have to add to your private_keys your steamLoginSecure string.'
+            'description' : 'Puts the data of a specific case daily price information in the game Counter Strike: Global Offensive to the mongodb database of the website this api call needs your steamLoginSecure string.'
         },  
             {
             'Endpoint' : '/put-all-case-item-price-history-daily',
@@ -85,16 +94,16 @@ def getCaseViews(request):
                 "itemCurrency": "CURRENCY_SYMBOL(PHP)",
                 "itemName": "CASE_NAME(Snakebite Case)",
             },
-            'description' : 'We should only use this in our backend locally this creates a json file for all cases in the game Counter Strike: Global Offensive the data information will be the daily price history you have to add to your private_keys your steamLoginSecure string.'
+            'description' : 'Puts the data of all the cases daily price information in the game Counter Strike: Global Offensive to the mongodb database of the website this api call needs your steamLoginSecure string.'
         },  
             {
             'Endpoint' : '/update-specific-case-item-price-history-daily',
-            'method' : 'POST',
+            'method' : 'PUT',
             'body' : {
                 "itemCurrency": "CURRENCY_SYMBOL(PHP)",
                 "itemName": "CASE_NAME(Snakebite Case)",
             },
-            'description' : 'We should only use this in our backend locally this creates a json file for all cases in the game Counter Strike: Global Offensive the data information will be the daily price history you have to add to your private_keys your steamLoginSecure string.'
+            'description' : 'Updates the data of a specific cases daily price information in the game Counter Strike: Global Offensive to the mongodb database of the website this api call needs your steamLoginSecure string.'
         },  
             {
             'Endpoint' : '/create-all-case-item-price-history-daily',

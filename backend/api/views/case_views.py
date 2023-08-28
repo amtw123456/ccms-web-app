@@ -470,7 +470,7 @@ def putAllCaseDailyPriceHistoryToDatabase(request):
     steam_login = os.getenv("STEAM_LOGIN_SECURE")
 
     for caseName in myCaseDictionary:
-        time.sleep(6)
+        # time.sleep(6)
         today = datetime.now()
         last_month = today - timedelta(days=32)  # Assuming a month is approximately 30 days
         
